@@ -12,6 +12,8 @@
 import numpy as np
 cimport numpy as np
 
+from ._utils cimport SplitValue
+
 from ._criterion cimport Criterion
 
 ctypedef np.npy_float32 DTYPE_t          # Type of X
@@ -19,6 +21,7 @@ ctypedef np.npy_float64 DOUBLE_t         # Type of y, sample_weight
 ctypedef np.npy_intp SIZE_t              # Type for indices and counters
 ctypedef np.npy_int32 INT32_t            # Signed 32 bit integer
 ctypedef np.npy_uint32 UINT32_t          # Unsigned 32 bit integer
+ctypedef np.npy_uint64 UINT64_t          # Unsigned 64 bit integer
 
 cdef struct SplitRecord:
     # Data to track sample split
@@ -26,7 +29,8 @@ cdef struct SplitRecord:
     SIZE_t pos             # Split samples array at the given position,
                            # i.e. count of samples below threshold for feature.
                            # pos is >= end if the node is a leaf.
-    double threshold       # Threshold to split at.
+    SplitValue split_value # Generalized threshold for categorical and
+                           # non-categorical features
     double improvement     # Impurity improvement given parent node.
     double impurity_left   # Impurity of the left split.
     double impurity_right  # Impurity of the right split.
@@ -59,10 +63,15 @@ cdef class Splitter:
 
     cdef bint presort                    # Whether to use presorting, only
                                          # allowed on dense data
+    cdef bint breiman_shortcut           # Whether decision trees are allowed to use the
+                                         # Breiman shortcut for categorical features
 
     cdef DOUBLE_t* y
     cdef SIZE_t y_stride
     cdef DOUBLE_t* sample_weight
+    cdef INT32_t *n_categories           # (n_features,) array giving number of
+                                         # categories (<0 for non-categorical)
+    cdef UINT32_t* cat_cache             # Cache buffer for fast categorical split evaluation
 
     # The samples vector `samples` is maintained by the Splitter object such
     # that the samples contained in a node are contiguous. With this setting,
@@ -81,17 +90,18 @@ cdef class Splitter:
     # This allows optimization with depth-based tree building.
 
     # Methods
-    cdef void init(self, object X, np.ndarray y,
-                   DOUBLE_t* sample_weight,
-                   np.ndarray X_idx_sorted=*) except *
+    cdef int init(self, object X, np.ndarray y,
+                  DOUBLE_t* sample_weight,
+                  INT32_t* n_categories,
+                  np.ndarray X_idx_sorted=*) except -1
 
-    cdef void node_reset(self, SIZE_t start, SIZE_t end,
-                         double* weighted_n_node_samples) nogil
+    cdef int node_reset(self, SIZE_t start, SIZE_t end,
+                        double* weighted_n_node_samples) nogil except -1
 
-    cdef void node_split(self,
-                         double impurity,   # Impurity of the node
-                         SplitRecord* split,
-                         SIZE_t* n_constant_features) nogil
+    cdef int node_split(self,
+                        double impurity,   # Impurity of the node
+                        SplitRecord* split,
+                        SIZE_t* n_constant_features) nogil except -1
 
     cdef void node_value(self, double* dest) nogil
 

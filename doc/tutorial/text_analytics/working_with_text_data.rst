@@ -212,7 +212,7 @@ dictionary of features and transform documents to feature vectors::
   >>> X_train_counts.shape
   (2257, 35788)
 
-:class:`CountVectorizer` supports counts of N-grams of words or consequective characters.
+:class:`CountVectorizer` supports counts of N-grams of words or consecutive characters.
 Once fitted, the vectorizer has built a dictionary of feature indices::
 
   >>> count_vect.vocabulary_.get(u'algorithm')
@@ -324,7 +324,8 @@ The names ``vect``, ``tfidf`` and ``clf`` (classifier) are arbitrary.
 We shall see their use in the section on grid search, below.
 We can now train the model with a single command::
 
-  >>> text_clf = text_clf.fit(twenty_train.data, twenty_train.target)
+  >>> text_clf.fit(twenty_train.data, twenty_train.target)  # doctest: +ELLIPSIS
+  Pipeline(...)
 
 
 Evaluation of the performance on the test set
@@ -353,7 +354,8 @@ classifier object into our pipeline::
   ...                      ('clf', SGDClassifier(loss='hinge', penalty='l2',
   ...                                            alpha=1e-3, n_iter=5, random_state=42)),
   ... ])
-  >>> _ = text_clf.fit(twenty_train.data, twenty_train.target)
+  >>> text_clf.fit(twenty_train.data, twenty_train.target)  # doctest: +ELLIPSIS
+  Pipeline(...)
   >>> predicted = text_clf.predict(docs_test)
   >>> np.mean(predicted == twenty_test.target)            # doctest: +ELLIPSIS
   0.912...
@@ -458,9 +460,9 @@ mean score and the parameters setting corresponding to that score::
   tfidf__use_idf: True
   vect__ngram_range: (1, 1)
 
-A more detailed summary of the search is available at ``gs_clf.results_``.
+A more detailed summary of the search is available at ``gs_clf.cv_results_``.
 
-The ``results_`` parameter can be easily imported into pandas as a
+The ``cv_results_`` parameter can be easily imported into pandas as a
 ``DataFrame`` for further inspection.
 
 .. note:
@@ -563,4 +565,3 @@ upon the completion of this tutorial:
 
 * Have a look at the :ref:`Hashing Vectorizer <hashing_vectorizer>`
   as a memory efficient alternative to :class:`CountVectorizer`.
-

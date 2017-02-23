@@ -149,7 +149,7 @@ def load_files(container_path, description=None, categories=None,
     container_path : string or unicode
         Path to the main folder holding one subfolder per category
 
-    description: string or unicode, optional (default=None)
+    description : string or unicode, optional (default=None)
         A paragraph describing the characteristic of the dataset: its source,
         reference, etc.
 
@@ -169,7 +169,7 @@ def load_files(container_path, description=None, categories=None,
         If not None, encoding to use to decode text files to Unicode if
         load_content is True.
 
-    decode_error: {'strict', 'ignore', 'replace'}, optional
+    decode_error : {'strict', 'ignore', 'replace'}, optional
         Instruction on what to do if a byte sequence is given to analyze that
         contains characters not of the given `encoding`. Passed as keyword
         argument 'errors' to bytes.decode.
@@ -264,7 +264,7 @@ def load_iris(return_X_y=False):
         If True, returns ``(data, target)`` instead of a Bunch object.
         See below for more information about the `data` and `target` object.
 
-    .. versionadded:: 0.18
+        .. versionadded:: 0.18
 
     Returns
     -------
@@ -277,7 +277,7 @@ def load_iris(return_X_y=False):
 
     (data, target) : tuple if ``return_X_y`` is True
 
-    .. versionadded:: 0.18
+        .. versionadded:: 0.18
 
     Examples
     --------
@@ -318,7 +318,7 @@ def load_iris(return_X_y=False):
                                 'petal length (cm)', 'petal width (cm)'])
 
 
-def load_breast_cancer():
+def load_breast_cancer(return_X_y=False):
     """Load and return the breast cancer wisconsin dataset (classification).
 
     The breast cancer dataset is a classic and very easy binary classification
@@ -332,6 +332,14 @@ def load_breast_cancer():
     Features            real, positive
     =================   ==============
 
+    Parameters
+    ----------
+    return_X_y : boolean, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object.
+        See below for more information about the `data` and `target` object.
+
+        .. versionadded:: 0.18
+
     Returns
     -------
     data : Bunch
@@ -340,6 +348,10 @@ def load_breast_cancer():
         'target_names', the meaning of the labels, 'feature_names', the
         meaning of the features, and 'DESCR', the
         full description of the dataset.
+
+    (data, target) : tuple if ``return_X_y`` is True
+
+        .. versionadded:: 0.18
 
     The copy of UCI ML Breast Cancer Wisconsin (Diagnostic) dataset is
     downloaded from:
@@ -390,13 +402,16 @@ def load_breast_cancer():
                               'worst concavity', 'worst concave points',
                               'worst symmetry', 'worst fractal dimension'])
 
+    if return_X_y:
+        return data, target
+
     return Bunch(data=data, target=target,
                  target_names=target_names,
                  DESCR=fdescr,
                  feature_names=feature_names)
 
 
-def load_digits(n_class=10):
+def load_digits(n_class=10, return_X_y=False):
     """Load and return the digits dataset (classification).
 
     Each datapoint is a 8x8 image of a digit.
@@ -416,6 +431,12 @@ def load_digits(n_class=10):
     n_class : integer, between 0 and 10, optional (default=10)
         The number of classes to return.
 
+    return_X_y : boolean, default=False.
+        If True, returns ``(data, target)`` instead of a Bunch object.
+        See below for more information about the `data` and `target` object.
+
+        .. versionadded:: 0.18
+
     Returns
     -------
     data : Bunch
@@ -424,6 +445,10 @@ def load_digits(n_class=10):
         to each sample, 'target', the classification labels for each
         sample, 'target_names', the meaning of the labels, and 'DESCR',
         the full description of the dataset.
+
+    (data, target) : tuple if ``return_X_y`` is True
+
+        .. versionadded:: 0.18
 
     Examples
     --------
@@ -443,7 +468,7 @@ def load_digits(n_class=10):
                       delimiter=',')
     with open(join(module_path, 'descr', 'digits.rst')) as f:
         descr = f.read()
-    target = data[:, -1]
+    target = data[:, -1].astype(np.int)
     flat_data = data[:, :-1]
     images = flat_data.view()
     images.shape = (-1, 8, 8)
@@ -453,14 +478,17 @@ def load_digits(n_class=10):
         flat_data, target = flat_data[idx], target[idx]
         images = images[idx]
 
+    if return_X_y:
+        return flat_data, target
+
     return Bunch(data=flat_data,
-                 target=target.astype(np.int),
+                 target=target,
                  target_names=np.arange(10),
                  images=images,
                  DESCR=descr)
 
 
-def load_diabetes():
+def load_diabetes(return_X_y=False):
     """Load and return the diabetes dataset (regression).
 
     ==============      ==================
@@ -472,26 +500,52 @@ def load_diabetes():
 
     Read more in the :ref:`User Guide <datasets>`.
 
+    Parameters
+    ----------
+    return_X_y : boolean, default=False.
+        If True, returns ``(data, target)`` instead of a Bunch object.
+        See below for more information about the `data` and `target` object.
+
+        .. versionadded:: 0.18
+
     Returns
     -------
     data : Bunch
         Dictionary-like object, the interesting attributes are:
         'data', the data to learn and 'target', the regression target for each
         sample.
+
+    (data, target) : tuple if ``return_X_y`` is True
+
+        .. versionadded:: 0.18    
     """
     base_dir = join(dirname(__file__), 'data')
     data = np.loadtxt(join(base_dir, 'diabetes_data.csv.gz'))
     target = np.loadtxt(join(base_dir, 'diabetes_target.csv.gz'))
-    return Bunch(data=data, target=target)
+    
+    if return_X_y:
+        return data, target
+
+    return Bunch(data=data, target=target,
+                 feature_names=['age', 'sex', 'bmi', 'bp',
+                                's1', 's2', 's3', 's4', 's5', 's6'])
 
 
-def load_linnerud():
+def load_linnerud(return_X_y=False):
     """Load and return the linnerud dataset (multivariate regression).
 
     Samples total: 20
     Dimensionality: 3 for both data and targets
     Features: integer
     Targets: integer
+
+    Parameters
+    ----------
+    return_X_y : boolean, default=False.
+        If True, returns ``(data, target)`` instead of a Bunch object.
+        See below for more information about the `data` and `target` object.
+
+        .. versionadded:: 0.18
 
     Returns
     -------
@@ -500,6 +554,10 @@ def load_linnerud():
         'targets', the two multivariate datasets, with 'data' corresponding to
         the exercise and 'targets' corresponding to the physiological
         measurements, as well as 'feature_names' and 'target_names'.
+    
+    (data, target) : tuple if ``return_X_y`` is True
+
+        .. versionadded:: 0.18
     """
     base_dir = join(dirname(__file__), 'data/')
     # Read data
@@ -514,13 +572,16 @@ def load_linnerud():
     with open(dirname(__file__) + '/descr/linnerud.rst') as f:
         descr = f.read()
 
+    if return_X_y:
+        return data_exercise, data_physiological
+
     return Bunch(data=data_exercise, feature_names=header_exercise,
                  target=data_physiological,
                  target_names=header_physiological,
                  DESCR=descr)
 
 
-def load_boston():
+def load_boston(return_X_y=False):
     """Load and return the boston house-prices dataset (regression).
 
     ==============     ==============
@@ -530,12 +591,24 @@ def load_boston():
     Targets             real 5. - 50.
     ==============     ==============
 
+    Parameters
+    ----------
+    return_X_y : boolean, default=False.
+        If True, returns ``(data, target)`` instead of a Bunch object.
+        See below for more information about the `data` and `target` object.
+
+        .. versionadded:: 0.18
+
     Returns
     -------
     data : Bunch
         Dictionary-like object, the interesting attributes are:
         'data', the data to learn, 'target', the regression targets,
         and 'DESCR', the full description of the dataset.
+
+    (data, target) : tuple if ``return_X_y`` is True
+
+        .. versionadded:: 0.18    
 
     Examples
     --------
@@ -564,6 +637,9 @@ def load_boston():
         for i, d in enumerate(data_file):
             data[i] = np.asarray(d[:-1], dtype=np.float64)
             target[i] = np.asarray(d[-1], dtype=np.float64)
+
+    if return_X_y:
+        return data, target
 
     return Bunch(data=data,
                  target=target,
@@ -627,12 +703,12 @@ def load_sample_image(image_name):
 
     Parameters
     -----------
-    image_name: {`china.jpg`, `flower.jpg`}
+    image_name : {`china.jpg`, `flower.jpg`}
         The name of the sample image loaded
 
     Returns
     -------
-    img: 3D array
+    img : 3D array
         The image as a numpy array: height x width x color
 
     Examples

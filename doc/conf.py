@@ -32,10 +32,20 @@ import sphinx_gallery
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
-    'sphinx.ext.pngmath', 'numpy_ext.numpydoc',
+    'numpy_ext.numpydoc',
     'sphinx.ext.linkcode', 'sphinx.ext.doctest',
     'sphinx_gallery.gen_gallery',
+    'sphinx_issues',
 ]
+
+# pngmath / imgmath compatibility layer for different sphinx versions
+import sphinx
+from distutils.version import LooseVersion
+if LooseVersion(sphinx.__version__) < LooseVersion('1.4'):
+    extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append('sphinx.ext.imgmath')
+
 
 autodoc_default_flags = ['members', 'inherited-members']
 
@@ -59,7 +69,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u('scikit-learn')
-copyright = u('2010 - 2016, scikit-learn developers (BSD License)')
+copyright = u('2007 - 2017, scikit-learn developers (BSD License)')
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -258,6 +268,13 @@ def make_carousel_thumbs(app, exception):
         if os.path.exists(image):
             c_thumb = os.path.join(image_dir, glr_plot[:-4] + '_carousel.png')
             sphinx_gallery.gen_rst.scale_image(image, c_thumb, max_width, 190)
+
+
+# Config for sphinx_issues
+
+issues_uri = 'https://github.com/scikit-learn/scikit-learn/issues/{issue}'
+issues_github_path = 'scikit-learn/scikit-learn'
+issues_user_uri = 'https://github.com/{user}'
 
 
 def setup(app):
